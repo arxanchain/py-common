@@ -78,4 +78,4 @@ class ECCCryptoLib(ICryptoLib):
         :Returns: cipher text
         """
         return self._ecies.encrypt(self._public_key, plain_text)
-        ## return self._ecies.encrypt(self._cert.public_key(), plain_text)
+

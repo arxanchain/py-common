@@ -71,13 +71,10 @@ def decrypt_and_verify(data, crypto_lib):
         raw_data_with_sign = b64_crypted_data
 
     logging.debug("Data after decrypt: %s" %raw_data_with_sign)
-    print("Data after decrypt: %s" %raw_data_with_sign)
     signed_data = json.loads(raw_data_with_sign)
 
     logging.debug("dataBase64: [%s]" %signed_data["Data"])
     logging.debug("signBase64: [%s]" %signed_data["Signature"])
-    print("dataBase64: [%s]" %signed_data["Data"])
-    print("signBase64: [%s]" %signed_data["Signature"])
 
     raw_data = b64decode(signed_data["Data"])
     raw_signature = b64decode(signed_data["Signature"])
@@ -115,7 +112,6 @@ def sign_and_encrypt(data, crypto_lib):
 
     signed_data = SignedData(data_b64, sign_b64)
     data = json.dumps(signed_data.__dict__)
-    print "before crypt: %s" %data
     out = ""
     if IS_ENCRYPT:
         try:
@@ -125,5 +121,5 @@ def sign_and_encrypt(data, crypto_lib):
             raise Exception("call encrypt failed, %s" %e.message)
     else:
         out = data
-    print "sign_and_encrypt result: %s" %b64encode(out)
     return b64encode(out)
+
