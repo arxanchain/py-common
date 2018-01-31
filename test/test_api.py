@@ -14,28 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import abc
-import six
+import unittest
 
-@six.add_metaclass(abc.ABCMeta)
-class ICryptoLib(object):
-    @abc.abstractmethod
-    def sign(self, message):
-        """Returns signature of the message
-        """
+# Create your tests here.
+class ApiTest(unittest.TestCase):
+    """Rest api test. """
+    def setUp(self):
+        # Every test needs access to the request factory.
+        pass
 
-    @abc.abstractmethod
-    def verify(self, message, signature):
-        """Returns True if verified signature
-           equals to the message
-        """
+    def tearDown(self):
+        pass
 
-    @abc.abstractmethod
-    def decrypt(self, cipher_text):
-        """Returns the decrypted cipher_text
-        """
+    def test_api(self):
+        """Test API. """
+        pass
 
-    @abc.abstractmethod
-    def encrypt(self, plain_text):
-        """Returns the encrypted plain_text
-        """
+if __name__ == '__main__':
+    unittest.main()
+
