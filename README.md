@@ -12,7 +12,7 @@ Welcome for any kind of contributions, such as open issues, fix bugs and improve
 
 ## Install
 
-**Note:** If you want to run py-common in your operating system, you need to use **sdk-go-common** tools to generate executables and copy them into directory `py-common/cryption/utils`. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
+**Note:** Before using the py-common in your operating system, you need to build crypto tools and copy them into directory `py-common/cryption/utils`. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
 
 The following command will install py-common in a virtual environment.
 
