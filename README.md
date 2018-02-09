@@ -12,17 +12,26 @@ Welcome for any kind of contributions, such as open issues, fix bugs and improve
 
 ## Install
 
-**Note:** Before using the py-common in your operating system, you need to build crypto tools and copy them into directory `py-common/cryption/utils`. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
-
-The following command will install py-common in a virtual environment.
+The following command will install py-common in your python environment.
 
 ```sh
 
-$ virtualenv venv  # create a virtual env
-$ source venv/bin/activate  # activate virtual env
-
 $ python setup.py install # install py-common
-
-$ deactivate # deactivate virtual env
 ```
 
+## Usage
+
+**Note:** Before using the py-common in your operating system, you need to make a two-step preparation:
+
+1. Build executables with sdk-go-common cryption tools. To build these tools, you may need to install **golang** package **sdk-go-common**. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
+
+2. Copy executables **crypto-util** and **sign-util** into your py-common installation path `cryption/utils`.
+
+If you have no idea where your py-common is installed, user the following command to check out.
+
+```sh
+$ python -c 'import imp;print imp.find_module("cryption")[1]'
+/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption
+```
+
+In this case, you should copy executables into path **/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/**.

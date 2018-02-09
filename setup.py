@@ -17,5 +17,10 @@ setup(
     platforms='any',
     install_requires=requirements,
     include_package_data=True,
+    package_data={
+        "cryption": ["cryption/ecc/certs/tls/tls.cert",
+            "cryption/ecc/certs/users/alice/alice.key"
+            ]
+        },
     zip_safe=False,
 )

@@ -20,8 +20,10 @@ import os
 import json
 import logging
 import requests
-ROOT_PATH = os.path.join(os.path.dirname(__file__),
-        "../..")
+ROOT_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "../.."
+    )
 from cryption.crypto import sign_and_encrypt, decrypt_and_verify, sign
 
 CERT_PATH = os.path.join(ROOT_PATH, "cryption/ecc/certs")
@@ -47,7 +49,7 @@ def set_sign_body(body, secret_key, did, nonce, apikey, cert_path):
     :param nonce: nonce
     :Returns: crypted cipher text
     """
-    return sign(json.dumps(body), secret_key, did, nonce, apikey, cert_path)
+    return sign(json.dumps(body), secret_key, did, nonce)
 
 def do_get(url, headers):
     """Start GET request.
@@ -95,7 +97,13 @@ def require_ok(resp, apikey, cert_path):
 
     ## Decrypt and verify
     plain_body = decrypt_and_verify(resp.text, apikey, cert_path)
-    return json.loads(plain_body)
+    result = {}
+    try:
+        result = json.loads(plain_body)
+    except, ValueError, e:
+        logging.error("Respond body [{}]cannot be loaded: {}".format(plain_body, e))
+
+    return result
 
 def do_request(req_params, apikey, cert_path, request_func):
     """ Do requst with the given request function.
@@ -112,35 +120,13 @@ def do_request(req_params, apikey, cert_path, request_func):
     if len(apikey) <= 0:
         apikey = APIKEY
     beg_time = time.time()
-    if "body" in req_params:
+    if len(req_params["body"])>0:
         req_body = set_body(req_params["body"], apikey, cert_path)
         req_params["body"] = req_body
+    else:
+        del req_params["body"]
     resp = require_ok(request_func(**req_params),
             apikey, cert_path)
-    time_dur = time.time() - beg_time
-
-    return time_dur, resp
-
-## def do_sign_request(req_params, apikey, cert_path, sign_params, request_func):
-def do_sign_request(req_params, sign_params, request_func):
-    """ Do requst with the given request function.
-        And calculate total time used.
-
-    :param req_params: request parameters, including header, body, url
-    :param sign_params: apikey, cert_path, sign parameters, including secret_key, nonce, did
-    :Returns: time duration, response
-    """
-    if len(sign_params["cert_path"]) <= 0:
-        sign_params["cert_path"] = CERT_PATH
-    if len(sign_params["apikey"]) <= 0:
-        sign_params["apikey"] = APIKEY
-    beg_time = time.time()
-    if "body" in req_params:
-        sign_params["body"] = req_params["body"]
-        req_body = set_sign_body(**sign_params)
-        req_params["body"] = req_body
-    resp = require_ok(request_func(**req_params),
-            sign_params["apikey"], sign_params["cert_path"])
     time_dur = time.time() - beg_time
 
     return time_dur, resp
