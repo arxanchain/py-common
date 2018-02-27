@@ -27,11 +27,11 @@ $ python setup.py install # install py-common
 
 2. Copy executables **crypto-util** and **sign-util** into your py-common installation path `cryption/utils`.
 
-If you have no idea where your py-common is installed, user the following command to check out.
+If you have no idea where your py-common is installed, use the following command to check out.
 
 ```sh
 $ python -c 'import imp;print imp.find_module("cryption")[1]'
 /usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption
 ```
 
-In this case, you should copy executables into path **/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/**.
+In this case, you should copy executables into path `/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/`.

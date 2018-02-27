@@ -27,8 +27,9 @@ ROOT_PATH = os.path.join(
 from cryption.crypto import sign_and_encrypt, decrypt_and_verify, sign
 
 CERT_PATH = os.path.join(ROOT_PATH, "cryption/ecc/certs")
+STATUS_CODE_OK = 200
 
-APIKEY = "alice"
+APIKEY = "pWEzB4yMM1518346407"
 
 def set_body(body, apikey, cert_path):
     """Set body encdypted.
@@ -60,7 +61,7 @@ def do_get(url, headers):
     """
     return requests.get(url, headers=headers)
 
-def do_post(url, headers, body):
+def do_post(url, headers, body, files=None):
     """Start POST request.
 
     :param url: URL that request is sent to
@@ -68,7 +69,7 @@ def do_post(url, headers, body):
     :param body: body dictionary
     :Returns: response
     """
-    return requests.post(url, headers=headers, data=body)
+    return requests.post(url, headers=headers, data=body, files=files)
 
 def do_put(url, headers, body):
     """Start POST request.
@@ -88,21 +89,25 @@ def require_ok(resp, apikey, cert_path):
     :param cert_path: path of private key file and cert file
     :Returns: plain response body
     """
-    if resp.status_code != requests.codes.ok:
-        logging.error("Status code: %s, Client Error, body: %s" %(resp.status_code, resp.text))
+    client_err_msg = ""
+    if resp.status_code != STATUS_CODE_OK:
+        logging.error("Status code: {}, Client Error, body: {}".format(resp.status_code, resp.text))
 
     if len(resp.text) <= 0:
-        logging.error("Respond error: Body empty")
-        return None
+        client_err_msg = "Respond error: Body empty"
+        logging.error(client_err_msg)
 
     ## Decrypt and verify
-    plain_body = decrypt_and_verify(resp.text, apikey, cert_path)
     result = {}
+    plain_body = ""
     try:
+        plain_body = decrypt_and_verify(resp.text, apikey, cert_path)
         result = json.loads(plain_body)
-    except, ValueError, e:
-        logging.error("Respond body [{}]cannot be loaded: {}".format(plain_body, e))
-
+    except Exception:
+        logging.error("cannot decrypt_and_verify response body: {}".format(resp.text))
+        client_err_msg = resp.text
+    result["ClientErrMsg"] = client_err_msg
+    
     return result
 
 def do_request(req_params, apikey, cert_path, request_func):
@@ -120,14 +125,13 @@ def do_request(req_params, apikey, cert_path, request_func):
     if len(apikey) <= 0:
         apikey = APIKEY
     beg_time = time.time()
-    if len(req_params["body"])>0:
+    if request_func == do_get and "body" in req_params:
+        del req_params["body"]
+    else:
         req_body = set_body(req_params["body"], apikey, cert_path)
         req_params["body"] = req_body
-    else:
-        del req_params["body"]
     resp = require_ok(request_func(**req_params),
             apikey, cert_path)
     time_dur = time.time() - beg_time
 
     return time_dur, resp
-

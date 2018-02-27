@@ -16,11 +16,14 @@ setup(
     packages=find_packages(),
     platforms='any',
     install_requires=requirements,
-    include_package_data=True,
+    dependency_links=[
+        "git+git@github.com:gabrielfalcao/HTTPretty.git#egg=httpretty-0.8.14"
+    ],
     package_data={
         "cryption": ["cryption/ecc/certs/tls/tls.cert",
-            "cryption/ecc/certs/users/alice/alice.key"
+            "cryption/ecc/certs/users/pWEzB4yMM1518346407/pWEzB4yMM1518346407.key"
             ]
         },
     zip_safe=False,
+    include_package_data=True,
 )
