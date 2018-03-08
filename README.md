@@ -35,3 +35,12 @@ $ python -c 'import imp;print imp.find_module("cryption")[1]'
 ```
 
 In this case, you should copy executables into path `/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/`.
+
+### Run unit test
+
+The following command will run unit test.
+
+```sh
+$ pytest
+```
+
