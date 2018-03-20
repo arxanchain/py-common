@@ -21,26 +21,26 @@ $ python setup.py install # install py-common
 
 ## Usage
 
-**Note:** Before using the py-common in your operating system, you need to make a two-step preparation:
+**Note:** Before using the py-common in your application, you need to make the following preparations:
 
-### 1.Configure your cryption tool and signature tool
+### 1.Configure your encryption and signing libraries
 
-1. Build executables with sdk-go-common cryption tools. To build these tools, you may need to install **golang** package **sdk-go-common**. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
+1. Build executables with sdk-go-common encryption tools. To build these executables, you need to install **golang** and download **sdk-go-common**. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md)
 
-2. Copy executables **crypto-util** and **sign-util** into your py-common installation path `cryption/utils`
+2. Copy the executables **crypto-util** and **sign-util** into your py-common installation path `cryption/utils`
 
-If you have no idea where your py-common is installed, use the following command to check out(you need to jump out of your git clone directory before running this command).
+If you have no idea where your py-common is installed, use the following command to check out(you need to leave the py-common code repo before running this command).
 
 ```sh
 $ python -c 'import imp;print imp.find_module("cryption")[1]'
 /usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption
 ```
 
-In this case, you should copy executables into path `/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/`
+In this case, you should copy the executables into path `/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/`
 
 ### 2. Configure you certificates
 
-To communicate with server, you need to download TLS certificate, register api-key and download the corresponding private key file from your chainconsole, if you have no idea how to start, please refer to [API cert management](http://www.arxanfintech.com/infocenter/html/chainconsole/manual.html#api)
+To communicate with the server, you need to download a TLS certificate, register api-key and download the corresponding private key file from your ArxanChain BaaS Chainconsole. Refer to [API cert management](http://www.arxanfintech.com/infocenter/html/chainconsole/manual.html#api) for more details.
 
 After downloaded the two files, use the following command to convert your private key file into PEM format
 
@@ -48,7 +48,7 @@ After downloaded the two files, use the following command to convert your privat
 $ openssl ec -in apikey.key -outform PEM -out apikey.key
 ```
 
-Then copy(rename if neccessary) your TLS certificate and PEM private key file into your py-common installation path as the following
+Then copy(rename as follows) your TLS certificate and PEM private key file into your py-common installation path as the following
 
 ```
 .

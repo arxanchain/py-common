@@ -20,12 +20,13 @@ import json
 import sys
 import httpretty
 import mock
+import requests
 ROOTPATH = os.path.join(
     os.path.dirname(__file__),
     "../"
     )
 sys.path.append(ROOTPATH)
-from rest.api.api import set_body, set_sign_body, do_get, do_post, do_put, require_ok, do_request
+from rest.api.api import set_body, set_sign_body, do_get, do_post, do_put, require_ok, do_request, do_prepare
 
 class Response(object):
     def __init__(self, status_code, text):
@@ -38,6 +39,7 @@ class ApiTest(unittest.TestCase):
     def setUp(self):
         # Every test needs access to the request factory.
         self.header = {}
+        self.url = "http://127.0.0.1"
         self.status_not_found = 404
         self.resp_not_found = "404 Not Found"
         self.nonce = "nonce"
@@ -152,4 +154,53 @@ class ApiTest(unittest.TestCase):
                     )
 
                 self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
-        
+
+    def test_do_prepare_succ(self):
+        mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
+        request_func = do_post
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.Session.send', mock_send):
+                poeid_filepart = (
+                        "",
+                        "poe id",
+                        )
+                files = {"poe_id": poeid_filepart}
+
+                _, result = do_prepare(
+                        requests.Request(
+                            "POST",
+                            url=self.url,
+                            files=files
+                            ).prepare(),
+                        self.apikey,
+                        self.cert_path
+                        )
+
+                self.assertEqual(0, result["ErrCode"])
+
+    def test_do_prepare_fail(self):
+        mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.Session.send', mock_send):
+                poeid_filepart = (
+                        "",
+                        "poe id",
+                        )
+                files = {
+                        "poe_id": poeid_filepart,
+                        }
+
+                _, result = do_prepare(
+                        requests.Request(
+                            "POST",
+                            url=self.url,
+                            files=files
+                            ).prepare(),
+                        self.apikey,
+                        self.cert_path
+                        )
+
+                self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
+
