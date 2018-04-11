@@ -89,14 +89,16 @@ def do_put(url, headers, body):
     """
     return requests.put(url, headers=headers, data=body)
 
-def require_ok(resp, apikey, cert_path):
+def require_ok(resp, apikey, cert_path, encrypt_switch=True):
     """Validate response.
 
     :param resp: response
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
+    :param encrypt_switch: switch that enables encrypt/decrypt function
     :Returns: plain response body
     """
+    result = {}
     client_err_msg = ""
     if resp.status_code != STATUS_CODE_OK:
         logging.error("Status code: {}, Client Error, body: {}".format(
@@ -104,28 +106,31 @@ def require_ok(resp, apikey, cert_path):
                 resp.text))
 
     if len(resp.text) <= 0:
-        client_err_msg = "Respond error: Body empty"
-        logging.error(client_err_msg)
+        result["ClientErrMsg"] = "Respond error: Body empty"
+        logging.error(result["ClientErrMsg"])
+        return result
 
     ## Decrypt and verify
-    result = {}
     plain_body = ""
-    try:
-        plain_body = decrypt_and_verify(
-                resp.text,
-                apikey,
-                cert_path
-                )
-        result = json.loads(plain_body)
-    except Exception:
-        logging.error("cannot decrypt_and_verify response body: {}".format(resp.text))
-        client_err_msg = resp.text
+    if encrypt_switch:
+        try:
+            plain_body = decrypt_and_verify(
+                    resp.text,
+                    apikey,
+                    cert_path
+                    )
+            result.update(json.loads(plain_body))
+        except Exception:
+            logging.error("cannot decrypt_and_verify response body: {}".format(resp.text))
+            result["ClientErrMsg"] = resp.text
+        finally:
+            return result
 
-    result["ClientErrMsg"] = client_err_msg
-    
+    result.update(json.loads(resp.text))
+
     return result
 
-def do_request(req_params, apikey, cert_path, request_func):
+def do_request(req_params, apikey, cert_path, request_func, encrypt_switch=True):
     """ Do requst with the given request function.
         And calculate total time used.
 
@@ -133,6 +138,7 @@ def do_request(req_params, apikey, cert_path, request_func):
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
     :param request_func: request function to be used
+    :param encrypt_switch: switch that enables encrypt/decrypt function
     :Returns: time duration, response
     """
 
@@ -145,16 +151,23 @@ def do_request(req_params, apikey, cert_path, request_func):
     if request_func == do_get and "body" in req_params:
         del req_params["body"]
     else:
-        req_body = set_body(
-                req_params["body"],
-                apikey,
-                cert_path
-                )
+        req_body = ""
+        if encrypt_switch:
+            req_body = set_body(
+                    req_params["body"],
+                    apikey,
+                    cert_path
+                    )
+        else:
+            req_body = json.dumps(req_params["body"])
         req_params["body"] = req_body
 
     resp = require_ok(
             request_func(**req_params),
-            apikey, cert_path)
+            apikey,
+            cert_path,
+            encrypt_switch
+            )
 
     time_dur = time.time() - beg_time
 
