@@ -31,6 +31,7 @@ STATUS_CODE_OK = 200
 
 APIKEY = "pWEzB4yMM1518346407"
 
+
 def set_body(body, apikey, cert_path):
     """Set body encdypted.
 
@@ -44,6 +45,7 @@ def set_body(body, apikey, cert_path):
 
     return sign_and_encrypt(body, apikey, cert_path)
 
+
 def set_sign_body(body, secret_key, did, nonce, apikey, cert_path):
     """Set body signed.
 
@@ -55,6 +57,7 @@ def set_sign_body(body, secret_key, did, nonce, apikey, cert_path):
     """
     return sign(json.dumps(body), secret_key, did, nonce)
 
+
 def do_get(url, headers):
     """Start GET request.
 
@@ -63,6 +66,7 @@ def do_get(url, headers):
     :Returns: response
     """
     return requests.get(url, headers=headers)
+
 
 def do_post(url, headers, body, files=None):
     """Start POST request.
@@ -79,6 +83,7 @@ def do_post(url, headers, body, files=None):
             files=files
             )
 
+
 def do_put(url, headers, body):
     """Start POST request.
 
@@ -88,6 +93,7 @@ def do_put(url, headers, body):
     :Returns: response
     """
     return requests.put(url, headers=headers, data=body)
+
 
 def require_ok(resp, apikey, cert_path, encrypt_switch=True):
     """Validate response.
@@ -110,7 +116,7 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
         logging.error(result["ClientErrMsg"])
         return result
 
-    ## Decrypt and verify
+    # Decrypt and verify
     plain_body = ""
     if encrypt_switch:
         try:
@@ -121,7 +127,10 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
                     )
             result.update(json.loads(plain_body))
         except Exception:
-            logging.error("cannot decrypt_and_verify response body: {}".format(resp.text))
+            logging.errorf(
+                    "cannot decrypt_and_verify response body: %s",
+                    resp.text
+                    )
             result["ClientErrMsg"] = resp.text
         finally:
             return result
@@ -130,7 +139,9 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
 
     return result
 
-def do_request(req_params, apikey, cert_path, request_func, encrypt_switch=True):
+
+def do_request(req_params, apikey, cert_path,
+        request_func, encrypt_switch=True):
     """ Do requst with the given request function.
         And calculate total time used.
 
@@ -173,6 +184,7 @@ def do_request(req_params, apikey, cert_path, request_func, encrypt_switch=True)
 
     return time_dur, resp
 
+
 def do_prepare(prepared, apikey, cert_path):
     """ Do requst with the given request object.
         And calculate total time used.
@@ -193,4 +205,3 @@ def do_prepare(prepared, apikey, cert_path):
     time_dur = time.time() - beg_time
 
     return time_dur, resp
-
