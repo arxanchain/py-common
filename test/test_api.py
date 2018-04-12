@@ -158,7 +158,6 @@ class ApiTest(unittest.TestCase):
     def test_do_prepare_succ(self):
         mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        request_func = do_post
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.Session.send', mock_send):
                 poeid_filepart = (
@@ -204,3 +203,20 @@ class ApiTest(unittest.TestCase):
 
                 self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
 
+    def test_do_request_with_no_encrypt_succ(self):
+        mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
+        request_func = do_post
+        with mock.patch('requests.post', mock_do_post):
+            _, result = do_request(
+                {
+                    "headers": self.header,
+                    "body": self.request,
+                    "url": self.uri,
+                    },
+                self.apikey,
+                self.cert_path,
+                request_func,
+                False
+                )
+
+            self.assertEqual(0, result["ErrCode"])

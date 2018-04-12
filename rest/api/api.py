@@ -102,32 +102,35 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
     :param encrypt_switch: switch that enables encrypt/decrypt function
-    :Returns: plain response body
+    :Returns: plain response body, if encrypt_switch is True, then return
+    dict will have field 'ClientErrMsg', otherwise not
     """
     result = {}
-    client_err_msg = ""
     if resp.status_code != STATUS_CODE_OK:
         logging.error("Status code: {}, Client Error, body: {}".format(
                 resp.status_code,
                 resp.text))
 
     if len(resp.text) <= 0:
-        result["ClientErrMsg"] = "Respond error: Body empty"
-        logging.error(result["ClientErrMsg"])
+        logging.error("Respond error: Body empty")
+
+        if encrypt_switch:
+            result["ClientErrMsg"] = "Respond error: Body empty"
         return result
 
     # Decrypt and verify
-    plain_body = ""
     if encrypt_switch:
         try:
+            plain_body = ""
             plain_body = decrypt_and_verify(
                     resp.text,
                     apikey,
                     cert_path
                     )
             result.update(json.loads(plain_body))
+            result["ClientErrMsg"] = ""
         except Exception:
-            logging.errorf(
+            logging.error(
                     "cannot decrypt_and_verify response body: %s",
                     resp.text
                     )
@@ -136,7 +139,6 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
             return result
 
     result.update(json.loads(resp.text))
-
     return result
 
 
@@ -197,11 +199,13 @@ def do_prepare(prepared, apikey, cert_path):
     prepared.body = set_body(prepared.body, apikey, cert_path)
     prepared.headers['Content-Length'] = str(len(prepared.body))
     beg_time = time.time()
+    result = requests.session().send(prepared)
     resp = require_ok(
-            requests.session().send(prepared),
+            result,
             apikey,
             cert_path
             )
     time_dur = time.time() - beg_time
 
     return time_dur, resp
+
