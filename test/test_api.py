@@ -220,3 +220,4 @@ class ApiTest(unittest.TestCase):
                 )
 
             self.assertEqual(0, result["ErrCode"])
+

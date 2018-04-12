@@ -32,7 +32,7 @@ STATUS_CODE_OK = 200
 APIKEY = "pWEzB4yMM1518346407"
 
 
-def set_body(body, apikey, cert_path):
+def set_body(body, apikey, cert_path, enable_crypto=True):
     """Set body encdypted.
 
     :param body: body dictionary or string to be encrypted
@@ -40,6 +40,9 @@ def set_body(body, apikey, cert_path):
     :param cert_path: path of private key file and cert file
     :Returns: crypted cipher text
     """
+    if not enable_crypto:
+        return json.dumps(body)
+
     if isinstance(body, dict):
         body = json.dumps(body)
 
@@ -95,14 +98,14 @@ def do_put(url, headers, body):
     return requests.put(url, headers=headers, data=body)
 
 
-def require_ok(resp, apikey, cert_path, encrypt_switch=True):
+def require_ok(resp, apikey, cert_path, enable_crypto=True):
     """Validate response.
 
     :param resp: response
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
-    :param encrypt_switch: switch that enables encrypt/decrypt function
-    :Returns: plain response body, if encrypt_switch is True, then return
+    :param enable_crypto: switch that enables encrypt/decrypt function
+    :Returns: plain response body, if enable_crypto is True, then return
     dict will have field 'ClientErrMsg', otherwise not
     """
     result = {}
@@ -114,12 +117,12 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
     if len(resp.text) <= 0:
         logging.error("Respond error: Body empty")
 
-        if encrypt_switch:
+        if enable_crypto:
             result["ClientErrMsg"] = "Respond error: Body empty"
         return result
 
     # Decrypt and verify
-    if encrypt_switch:
+    if enable_crypto:
         try:
             plain_body = ""
             plain_body = decrypt_and_verify(
@@ -143,7 +146,7 @@ def require_ok(resp, apikey, cert_path, encrypt_switch=True):
 
 
 def do_request(req_params, apikey, cert_path,
-        request_func, encrypt_switch=True):
+        request_func, enable_crypto=True):
     """ Do requst with the given request function.
         And calculate total time used.
 
@@ -151,7 +154,7 @@ def do_request(req_params, apikey, cert_path,
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
     :param request_func: request function to be used
-    :param encrypt_switch: switch that enables encrypt/decrypt function
+    :param enable_crypto: switch that enables encrypt/decrypt function
     :Returns: time duration, response
     """
 
@@ -164,22 +167,19 @@ def do_request(req_params, apikey, cert_path,
     if request_func == do_get and "body" in req_params:
         del req_params["body"]
     else:
-        req_body = ""
-        if encrypt_switch:
-            req_body = set_body(
-                    req_params["body"],
-                    apikey,
-                    cert_path
-                    )
-        else:
-            req_body = json.dumps(req_params["body"])
+        req_body = set_body(
+                req_params["body"],
+                apikey,
+                cert_path,
+                enable_crypto
+                )
         req_params["body"] = req_body
 
     resp = require_ok(
             request_func(**req_params),
             apikey,
             cert_path,
-            encrypt_switch
+            enable_crypto 
             )
 
     time_dur = time.time() - beg_time
@@ -187,7 +187,7 @@ def do_request(req_params, apikey, cert_path,
     return time_dur, resp
 
 
-def do_prepare(prepared, apikey, cert_path):
+def do_prepare(prepared, apikey, cert_path, enable_crypto=True):
     """ Do requst with the given request object.
         And calculate total time used.
 
@@ -196,7 +196,11 @@ def do_prepare(prepared, apikey, cert_path):
     :param cert_path: path of private key file and cert file
     :Returns: time duration, response
     """
-    prepared.body = set_body(prepared.body, apikey, cert_path)
+    prepared.body = set_body(prepared.body,
+            apikey,
+            cert_path,
+            enable_crypto
+            )
     prepared.headers['Content-Length'] = str(len(prepared.body))
     beg_time = time.time()
     result = requests.session().send(prepared)
