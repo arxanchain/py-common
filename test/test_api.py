@@ -1,17 +1,4 @@
-"""
-Copyright ArxanFintech Technology Ltd. 2018 All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-                 http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+""" Copyright ArxanFintech Technology Ltd. 2018 All Rights Reserved.  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
 """
 
 import unittest
@@ -26,7 +13,7 @@ ROOTPATH = os.path.join(
     "../"
     )
 sys.path.append(ROOTPATH)
-from rest.api.api import do_get, do_post, do_put, CertStore
+from rest.api.api import Config
 
 class Response(object):
     def __init__(self, status_code, text):
@@ -76,7 +63,12 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_get(self.uri, self.header)
+        cert_store = Config(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        result = cert_store.do_get(self.header)
         self.assertEqual(self.status_ok, result.status_code)
         content = json.loads(result.content)
         self.assertEqual(0, content["ErrCode"])
@@ -91,7 +83,12 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_post(self.uri, self.header, self.request)
+        cert_store = Config(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        result = cert_store.do_post(self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -104,7 +101,12 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_put(self.uri, self.header, self.request)
+        cert_store = Config(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        result = cert_store.do_put(self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -113,18 +115,18 @@ class ApiTest(unittest.TestCase):
     def test_do_request_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        request_func = do_post
-        cert_store = CertStore(
+        cert_store = Config(
                 self.apikey,
                 self.cert_path,
+                self.uri
                 )
+        request_func = cert_store.do_post
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.post', mock_do_post):
                 _, result = cert_store.do_request(
                     {
                         "headers": self.header,
                         "body": self.request,
-                        "url": self.uri
                         },
                     request_func
                     )
@@ -134,18 +136,18 @@ class ApiTest(unittest.TestCase):
     def test_do_request_fail(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
-        request_func = do_post
-        cert_store = CertStore(
+        cert_store = Config(
                 self.apikey,
                 self.cert_path,
+                self.uri
                 )
+        request_func = cert_store.do_post
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.post', mock_do_post):
                 _, result = cert_store.do_request(
                     {
                         "headers": self.header,
                         "body": self.request,
-                        "url": self.uri
                         },
                     request_func
                     )
@@ -155,9 +157,10 @@ class ApiTest(unittest.TestCase):
     def test_do_prepare_succ(self):
         mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        cert_store = CertStore(
+        cert_store = Config(
                 self.apikey,
                 self.cert_path,
+                self.uri
                 )
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.Session.send', mock_send):
@@ -180,9 +183,10 @@ class ApiTest(unittest.TestCase):
     def test_do_prepare_fail(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
-        cert_store = CertStore(
+        cert_store = Config(
                 self.apikey,
                 self.cert_path,
+                self.uri
                 )
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.Session.send', mock_send):
@@ -206,18 +210,18 @@ class ApiTest(unittest.TestCase):
 
     def test_do_request_with_no_encrypt_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
-        request_func = do_post
-        cert_store = CertStore(
+        cert_store = Config(
                 self.apikey,
                 self.cert_path,
+                self.uri,
                 False
                 )
+        request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
                     "headers": self.header,
                     "body": self.request,
-                    "url": self.uri,
                     },
                 request_func,
                 )

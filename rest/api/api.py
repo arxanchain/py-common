@@ -31,12 +31,13 @@ STATUS_CODE_OK = 200
 
 APIKEY = "pWEzB4yMM1518346407"
 
-class CertStore(object):
+class Config(object):
     """A cert store implementation. """
 
-    def __init__(self, apikey, cert_path, enable_crypto=True):
+    def __init__(self, apikey, cert_path, ip_addr="", enable_crypto=True):
         self.__apikey = apikey
         self.__cert_path = cert_path
+        self.__ip_addr = ip_addr
         self.__enable_crypto = enable_crypto
 
     def set_body(self, body):
@@ -52,6 +53,18 @@ class CertStore(object):
             body = json.dumps(body)
 
         return sign_and_encrypt(body, self.__apikey, self.__cert_path)
+
+    def get_ip(self):
+        """ Get ip addr. """
+        return self.__ip_addr
+
+    def set_ip(self, ip):
+        """ Set ip addr. """
+        self.__ip_addr = ip
+
+    def get_apikey(self):
+        """ Get api key. """
+        return self.__apikey
 
     def set_sign_body(self, body, secret_key, did, nonce):
         """Set body signed.
@@ -123,7 +136,7 @@ class CertStore(object):
             self.__apikey = APIKEY
         beg_time = time.time()
     
-        if request_func == do_get and "body" in req_params:
+        if request_func == self.do_get and "body" in req_params:
             del req_params["body"]
         else:
             req_body = self.set_body(req_params["body"])
@@ -155,44 +168,42 @@ class CertStore(object):
         return time_dur, resp
 
 
-def do_get(url, headers):
-    """Start GET request.
-
-    :param url: URL that request is sent to
-    :param headers: headers dictionary
-    :Returns: response
-    """
-    return requests.get(url, headers=headers)
-
-
-def do_post(url, headers, body, files=None):
-    """Start POST request.
-
-    :param url: URL that request is sent to
-    :param header: header dictionary
-    :param body: body dictionary
-    :Returns: response
-    """
-    return requests.post(
-            url,
-            headers=headers,
-            data=body,
-            files=files
-            )
-
-
-def do_put(url, headers, body):
-    """Start POST request.
-
-    :param url: URL that request is sent to
-    :param header: header dictionary
-    :param body: body dictionary
-    :Returns: response
-    """
-    return requests.put(
-            url,
-            headers=headers,
-            data=body
-            )
-
-
+    def do_get(self, headers):
+        """Start GET request.
+    
+        :param headers: headers dictionary
+        :Returns: response
+        """
+        return requests.get(self.__ip_addr, headers=headers)
+    
+    
+    def do_post(self, headers, body, files=None):
+        """Start POST request.
+    
+        :param header: header dictionary
+        :param body: body dictionary
+        :Returns: response
+        """
+        return requests.post(
+                self.__ip_addr,
+                headers=headers,
+                data=body,
+                files=files
+                )
+    
+    
+    def do_put(self, headers, body):
+        """Start POST request.
+    
+        :param url: URL that request is sent to
+        :param header: header dictionary
+        :param body: body dictionary
+        :Returns: response
+        """
+        return requests.put(
+                self.__ip_addr,
+                headers=headers,
+                data=body
+                )
+    
+    
