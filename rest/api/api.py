@@ -31,7 +31,8 @@ STATUS_CODE_OK = 200
 
 APIKEY = "pWEzB4yMM1518346407"
 
-def set_body(body, apikey, cert_path):
+
+def set_body(body, apikey, cert_path, enable_crypto=True):
     """Set body encdypted.
 
     :param body: body dictionary or string to be encrypted
@@ -39,10 +40,14 @@ def set_body(body, apikey, cert_path):
     :param cert_path: path of private key file and cert file
     :Returns: crypted cipher text
     """
+    if not enable_crypto:
+        return json.dumps(body)
+
     if isinstance(body, dict):
         body = json.dumps(body)
 
     return sign_and_encrypt(body, apikey, cert_path)
+
 
 def set_sign_body(body, secret_key, did, nonce, apikey, cert_path):
     """Set body signed.
@@ -55,6 +60,7 @@ def set_sign_body(body, secret_key, did, nonce, apikey, cert_path):
     """
     return sign(json.dumps(body), secret_key, did, nonce)
 
+
 def do_get(url, headers):
     """Start GET request.
 
@@ -63,6 +69,7 @@ def do_get(url, headers):
     :Returns: response
     """
     return requests.get(url, headers=headers)
+
 
 def do_post(url, headers, body, files=None):
     """Start POST request.
@@ -79,6 +86,7 @@ def do_post(url, headers, body, files=None):
             files=files
             )
 
+
 def do_put(url, headers, body):
     """Start POST request.
 
@@ -89,43 +97,56 @@ def do_put(url, headers, body):
     """
     return requests.put(url, headers=headers, data=body)
 
-def require_ok(resp, apikey, cert_path):
+
+def require_ok(resp, apikey, cert_path, enable_crypto=True):
     """Validate response.
 
     :param resp: response
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
-    :Returns: plain response body
+    :param enable_crypto: switch that enables encrypt/decrypt function
+    :Returns: plain response body, if enable_crypto is True, then return
+    dict will have field 'ClientErrMsg', otherwise not
     """
-    client_err_msg = ""
+    result = {}
     if resp.status_code != STATUS_CODE_OK:
         logging.error("Status code: {}, Client Error, body: {}".format(
                 resp.status_code,
                 resp.text))
 
     if len(resp.text) <= 0:
-        client_err_msg = "Respond error: Body empty"
-        logging.error(client_err_msg)
+        logging.error("Respond error: Body empty")
 
-    ## Decrypt and verify
-    result = {}
-    plain_body = ""
-    try:
-        plain_body = decrypt_and_verify(
-                resp.text,
-                apikey,
-                cert_path
-                )
-        result = json.loads(plain_body)
-    except Exception:
-        logging.error("cannot decrypt_and_verify response body: {}".format(resp.text))
-        client_err_msg = resp.text
+        if enable_crypto:
+            result["ClientErrMsg"] = "Respond error: Body empty"
+        return result
 
-    result["ClientErrMsg"] = client_err_msg
-    
+    # Decrypt and verify
+    if enable_crypto:
+        try:
+            plain_body = ""
+            plain_body = decrypt_and_verify(
+                    resp.text,
+                    apikey,
+                    cert_path
+                    )
+            result.update(json.loads(plain_body))
+            result["ClientErrMsg"] = ""
+        except Exception:
+            logging.error(
+                    "cannot decrypt_and_verify response body: %s",
+                    resp.text
+                    )
+            result["ClientErrMsg"] = resp.text
+        finally:
+            return result
+
+    result.update(json.loads(resp.text))
     return result
 
-def do_request(req_params, apikey, cert_path, request_func):
+
+def do_request(req_params, apikey, cert_path,
+        request_func, enable_crypto=True):
     """ Do requst with the given request function.
         And calculate total time used.
 
@@ -133,6 +154,7 @@ def do_request(req_params, apikey, cert_path, request_func):
     :param apikey: the api key authorized by the server
     :param cert_path: path of private key file and cert file
     :param request_func: request function to be used
+    :param enable_crypto: switch that enables encrypt/decrypt function
     :Returns: time duration, response
     """
 
@@ -148,19 +170,24 @@ def do_request(req_params, apikey, cert_path, request_func):
         req_body = set_body(
                 req_params["body"],
                 apikey,
-                cert_path
+                cert_path,
+                enable_crypto
                 )
         req_params["body"] = req_body
 
     resp = require_ok(
             request_func(**req_params),
-            apikey, cert_path)
+            apikey,
+            cert_path,
+            enable_crypto 
+            )
 
     time_dur = time.time() - beg_time
 
     return time_dur, resp
 
-def do_prepare(prepared, apikey, cert_path):
+
+def do_prepare(prepared, apikey, cert_path, enable_crypto=True):
     """ Do requst with the given request object.
         And calculate total time used.
 
@@ -169,11 +196,16 @@ def do_prepare(prepared, apikey, cert_path):
     :param cert_path: path of private key file and cert file
     :Returns: time duration, response
     """
-    prepared.body = set_body(prepared.body, apikey, cert_path)
+    prepared.body = set_body(prepared.body,
+            apikey,
+            cert_path,
+            enable_crypto
+            )
     prepared.headers['Content-Length'] = str(len(prepared.body))
     beg_time = time.time()
+    result = requests.session().send(prepared)
     resp = require_ok(
-            requests.session().send(prepared),
+            result,
             apikey,
             cert_path
             )
