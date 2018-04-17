@@ -53,7 +53,11 @@ class Config(object):
         if isinstance(body, dict):
             body = json.dumps(body)
 
-        return sign_and_encrypt(body, self.__apikey, self.__cert_path)
+        return sign_and_encrypt(
+                body, 
+                self.__apikey,
+                self.__cert_path
+                )
 
     def get_ip(self):
         """ Get ip addr. """
@@ -81,15 +85,19 @@ class Config(object):
         :param nonce: nonce
         :Returns: crypted cipher text
         """
-        return sign(json.dumps(body), secret_key, did, nonce)
+        return sign(
+                json.dumps(body),
+                secret_key,
+                did,
+                nonce
+                )
 
 
     def require_ok(self, resp):
         """Validate response.
     
         :param resp: response
-        :param enable_crypto: switch that enables encrypt/decrypt function
-        :Returns: plain response body, if enable_crypto is True, then return
+        :Returns: plain response body. if enable_crypto is True, then return
         dict will have field 'ClientErrMsg', otherwise not
         """
         result = {}
@@ -149,9 +157,7 @@ class Config(object):
             req_body = self.set_body(req_params["body"])
             req_params["body"] = req_body
     
-        resp = self.require_ok(
-                request_func(**req_params)
-                )
+        resp = self.require_ok(request_func(**req_params))
     
         time_dur = time.time() - beg_time
     
@@ -189,6 +195,7 @@ class Config(object):
     
         :param header: header dictionary
         :param body: body dictionary
+        :param files: files to post
         :Returns: response
         """
         return requests.post(
@@ -202,8 +209,7 @@ class Config(object):
     def do_put(self, headers, body):
         """Start POST request.
     
-        :param url: URL that request is sent to
-        :param header: header dictionary
+        :param headers: header dictionary
         :param body: body dictionary
         :Returns: response
         """

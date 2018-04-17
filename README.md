@@ -48,7 +48,7 @@ After downloading the two files, use the following command to convert your priva
 $ openssl ec -in apikey.key -outform PEM -out apikey.key
 ```
 
-Then copy (rename as follows) your TLS certificate and PEM private key file into your py-common installation path as follows. Please pay special attention to the absolute path of your certificate `./py_common-1.5.0-py2.7.egg/cryption/ecc/certs`, which will be used to create a wallet client.
+Then copy (rename as follows) your TLS certificate and PEM private key file into your py-common installation path as follows. Please pay special attention to the absolute path of your certificate `./py_common-1.5.0-py2.7.egg/cryption/ecc/certs`, which will be used to create a config.
 
 ```
 .
