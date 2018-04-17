@@ -39,6 +39,7 @@ class Config(object):
         self.__cert_path = cert_path
         self.__ip_addr = ip_addr
         self.__enable_crypto = enable_crypto
+        self.__url = ""
 
     def set_body(self, body):
         """Set body encdypted.
@@ -58,13 +59,18 @@ class Config(object):
         """ Get ip addr. """
         return self.__ip_addr
 
-    def set_ip(self, ip):
-        """ Set ip addr. """
-        self.__ip_addr = ip
+    def set_url(self, url=""):
+        """ Set url. """
+        if len(url) <= 0:
+            self.__url = self.__ip_addr
+        else:
+            self.__url = url
+
 
     def get_apikey(self):
         """ Get api key. """
         return self.__apikey
+
 
     def set_sign_body(self, body, secret_key, did, nonce):
         """Set body signed.
@@ -76,6 +82,7 @@ class Config(object):
         :Returns: crypted cipher text
         """
         return sign(json.dumps(body), secret_key, did, nonce)
+
 
     def require_ok(self, resp):
         """Validate response.
@@ -125,7 +132,7 @@ class Config(object):
         """ Do requst with the given request function.
             And calculate total time used.
     
-        :param req_params: request parameters, including header, body, url
+        :param req_params: request parameters, including header, body
         :param request_func: request function to be used
         :Returns: time duration, response
         """
@@ -174,7 +181,7 @@ class Config(object):
         :param headers: headers dictionary
         :Returns: response
         """
-        return requests.get(self.__ip_addr, headers=headers)
+        return requests.get(self.__url, headers=headers)
     
     
     def do_post(self, headers, body, files=None):
@@ -185,7 +192,7 @@ class Config(object):
         :Returns: response
         """
         return requests.post(
-                self.__ip_addr,
+                self.__url,
                 headers=headers,
                 data=body,
                 files=files
@@ -201,7 +208,7 @@ class Config(object):
         :Returns: response
         """
         return requests.put(
-                self.__ip_addr,
+                self.__url,
                 headers=headers,
                 data=body
                 )

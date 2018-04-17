@@ -68,6 +68,7 @@ class ApiTest(unittest.TestCase):
                 self.cert_path,
                 self.uri
                 )
+        cert_store.set_url()
         result = cert_store.do_get(self.header)
         self.assertEqual(self.status_ok, result.status_code)
         content = json.loads(result.content)
@@ -88,6 +89,7 @@ class ApiTest(unittest.TestCase):
                 self.cert_path,
                 self.uri
                 )
+        cert_store.set_url()
         result = cert_store.do_post(self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
@@ -106,6 +108,7 @@ class ApiTest(unittest.TestCase):
                 self.cert_path,
                 self.uri
                 )
+        cert_store.set_url()
         result = cert_store.do_put(self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
