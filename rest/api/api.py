@@ -218,5 +218,28 @@ class Config(object):
                 headers=headers,
                 data=body
                 )
+
+    def do_patch(self, headers, body):
+        """Start PATCH request.
     
+        :param headers: header dictionary
+        :param body: body dictionary
+        :Returns: response
+        """
+        return requests.patch(
+                self.__url,
+                headers=headers,
+                data=body
+                )
+    
+    def do_delete(self, headers):
+        """Start DELETE request.
+    
+        :param headers: header dictionary
+        :Returns: response
+        """
+        return requests.delete(
+                self.__url,
+                headers=headers,
+                )
     

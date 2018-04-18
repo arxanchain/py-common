@@ -8,6 +8,7 @@ import sys
 import httpretty
 import mock
 import requests
+import logging
 ROOTPATH = os.path.join(
     os.path.dirname(__file__),
     "../"
@@ -110,6 +111,44 @@ class ApiTest(unittest.TestCase):
                 )
         cert_store.set_url()
         result = cert_store.do_put(self.header, self.request)
+        content = json.loads(result.content)
+        self.assertEqual(self.status_ok, result.status_code)
+        self.assertEqual(0, content["ErrCode"])
+
+
+    def test_do_patch(self):
+        httpretty.register_uri(
+            httpretty.PATCH,
+            self.uri,
+            status=self.status_ok,
+            body=json.dumps(self.resp)
+            )
+        cert_store = Config(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_patch(self.header, self.request)
+        content = json.loads(result.content)
+        self.assertEqual(self.status_ok, result.status_code)
+        self.assertEqual(0, content["ErrCode"])
+
+
+    def test_do_delete(self):
+        httpretty.register_uri(
+            httpretty.DELETE,
+            self.uri,
+            status=self.status_ok,
+            body=json.dumps(self.resp)
+            )
+        cert_store = Config(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_delete(self.header)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
