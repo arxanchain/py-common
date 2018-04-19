@@ -32,7 +32,7 @@ STATUS_CODE_OK = 200
 APIKEY = "pWEzB4yMM1518346407"
 CODE_SERVER_RESP_INVALID = 10000
 CODE_DECRYPT_FAILED = 10001
-MSG_SERVER_RESP_INVALID = "client error: resp body empty"
+MSG_SERVER_RESP_INVALID = "client error: server response invalid"
 MSG_DECRYPT_FAILED = "client error: decrypt and verify failed"
 RESP_DICT = {
         "ErrCode":0,
