@@ -120,7 +120,6 @@ class Client(object):
             logging.error("Respond error: Body empty")
             result["ErrCode"] = CODE_RESP_BODY_EMPTY
             result["ErrMsg"] = MSG_RESP_BODY_EMPTY
-            logging.error("*****result: {}****".format(result))
 
             return result
     
