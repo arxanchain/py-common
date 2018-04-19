@@ -30,9 +30,9 @@ CERT_PATH = os.path.join(ROOT_PATH, "cryption/ecc/certs")
 STATUS_CODE_OK = 200
 
 APIKEY = "pWEzB4yMM1518346407"
-CODE_RESP_BODY_EMPTY = 10000
+CODE_SERVER_RESP_INVALID = 10000
 CODE_DECRYPT_FAILED = 10001
-MSG_RESP_BODY_EMPTY = "client error: resp body empty"
+MSG_SERVER_RESP_INVALID = "client error: resp body empty"
 MSG_DECRYPT_FAILED = "client error: decrypt and verify failed"
 RESP_DICT = {
         "ErrCode":0,
@@ -118,8 +118,8 @@ class Client(object):
     
         if len(resp.text) <= 0:
             logging.error("Respond error: Body empty")
-            result["ErrCode"] = CODE_RESP_BODY_EMPTY
-            result["ErrMsg"] = MSG_RESP_BODY_EMPTY
+            result["ErrCode"] = CODE_SERVER_RESP_INVALID
+            result["ErrMsg"] = MSG_SERVER_RESP_INVALID
 
             return result
     
