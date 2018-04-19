@@ -1,17 +1,4 @@
-"""
-Copyright ArxanFintech Technology Ltd. 2018 All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-                 http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+""" Copyright ArxanFintech Technology Ltd. 2018 All Rights Reserved.  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
 """
 
 import unittest
@@ -21,12 +8,14 @@ import sys
 import httpretty
 import mock
 import requests
+import logging
 ROOTPATH = os.path.join(
     os.path.dirname(__file__),
     "../"
     )
 sys.path.append(ROOTPATH)
-from rest.api.api import set_body, set_sign_body, do_get, do_post, do_put, require_ok, do_request, do_prepare
+from rest.api.api import Client, MSG_DECRYPT_FAILED, MSG_SERVER_RESP_INVALID, \
+        CODE_DECRYPT_FAILED, CODE_SERVER_RESP_INVALID
 
 class Response(object):
     def __init__(self, status_code, text):
@@ -60,13 +49,6 @@ class ApiTest(unittest.TestCase):
             os.path.dirname(__file__),
             "../cryption/ecc/certs"
             )
-        ## response:
-        ## {
-        ##     "ErrCode": 0,
-        ##     "ErrMessage": "",
-        ##     "Method": "",
-        ##     "Payload": "{\"code\":0,\"message\":\"\",\"id\":\"did:axn:769de30d-2170-453d-81ce-b8f566be1e7a#Organization\",\"endpoint\":\"d9f0f47af158609ef97399a7c38cf7885a0c32da5b4145706361ff6c7a3520e3\",\"key_pair\":{\"private_key\":\"QU9T6vN3g4q3MLAUL8YJxK90bBWvOw+QW4zONXSR1acNCG8tblPVcK/jzKFA/QRyQ+4lv3KN5JfMJRzek05NNw==\",\"public_key\":\"DQhvLW5T1XCv48yhQP0EckPuJb9yjeSXzCUc3pNOTTc=\"},\"created\":1519702836,\"coin_id\":\"\",\"transaction_ids\":[\"1e0edec693c1a22656d5db23d66b91ab9df0dcefef025dd293228e324fc8de4c\",\"bf6e2be1ab2fb0b66be2ee67732c885853524416e4904b6124cc9c5d2b1736d0\"]}"
-        ## }
         self.cipher = "BLAA7vB31SPsbQf18zb3Y80NeHfLQk00QZmLKU2T0r/z45xPKelbqvM9C15hKLWaJwlNSLdmjwnVhSeaaYWG/ao80rRHAvEA9nkw1WdOcfC0fAwF4NdHMwz2wuAw+QL5IYAmHOu2fXoiubF6Ay1Hdw0oN6W+RNa+1zFHD9SVdengCT5V7q0mcgUXbmd4YsKHfGG5Pyd17D38E6OIDdUy6skVk2xNSRKehmQ1AS4g2+nMbJS+XvPZzm26WCzT+0zhec7wE8yqzpXR9F45rHZaz5WYcxCTddyPJ31K+wrc7X/Y4UHhjuBuVeU5QJQagoJNuYqeWS3luwN+TVZpBI8sByXc5C+M0vNdJPiiuzD4DUrqusqbso6+J7L4YVF6rgg97q7iuUKQvnmQzsktrdofugbKm6xxdfqp2oiLOmCWf43K+05/wxv1d9iMyBBDy37OGHkwkSzXDtf9sRysW9lKb9rk+9PGdnDnQvmIUBlUYGLue0LcYxqc3dZIAvCvWFrK3FmvV3K6+3reAHx5+Ym7yuQPu721llgaJkhoVdnUJpBCZhxj4oe/t249WnI3t565e6AsFB13IrFaRQd62b+HTAYKHmIRg7aV9VbZHWUEg212R0UWPm5g2ghZ1AcIDBx2zDXDSPSonweNS3OWCEQ+KRTCyo2E3U8Fi0Ob2WIr6WKUiwPubKm101rWfTxKNqqT6uEVW0eVW1syfz8mHztnyZcHU8cfZ7xXNCr38IRpw6+1iUlOCDeWQYn8F5xchmRJ7A8LDf9OTmxZZ+tdj4jjLDBm1K+iI83/QqYk4tVCYBxYrwtb6uWqldaBjRP+5MXuIdkA785nB5kRuzwhF1jxdZJoDIIWDQH+1t1tZN3Z3WCACRRwVGnnK5UgZOrp7Qs/+FNh4C64yiG7X+R+BmbfM1N0frbQb/qK9d1HTi2pAVeGJ49c15EzeVJUuEdRgDUyNRtwYTxioVAZrBOcis2EbcOg2vzzHmUHYE87N08Fm1zrm0dRauTKaghvN+6+uRgj6UF26tl4xsxE2PUQ5OIiVWSTbT8zWSuq9QIVpuEGDh2k42adGXFaz4En36e/OXUPgv1fMDpgDwQFq3KOoIl/U5ZIsyv+tIKNM8998MQpXrDbGoq6yKpt0dGPxC2sc+eeXqXhV0gumB0EhPBzOdJhfdqhn8uCMqS3khcbNkERk5FI+Yw9FDcLVSVfESMdAeZBTT27fDb/QpByQzNm2s6fC7WxKATBZbH+Y0vohxSv1RqXBsQRj8roHiQ+aarEk4R5aTDU2sPvLb3jzAFyPqvnM6hZChQ5i3gS50A1yvAPEwKzEB4vdzUtst1ADpCEpPoF24bgpeYtMELhXBqxgJJl7pPEy+UaDNVlJLXAwszVbhZoyAVVAAL+dxJajJ6N/E3VQKSwMet3DO4myBg="
 
         httpretty.enable()
@@ -83,7 +65,13 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_get(self.uri, self.header)
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_get(self.header)
         self.assertEqual(self.status_ok, result.status_code)
         content = json.loads(result.content)
         self.assertEqual(0, content["ErrCode"])
@@ -98,7 +86,13 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_post(self.uri, self.header, self.request)
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_post(self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -111,7 +105,51 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        result = do_put(self.uri, self.header, self.request)
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_put(self.header, self.request)
+        content = json.loads(result.content)
+        self.assertEqual(self.status_ok, result.status_code)
+        self.assertEqual(0, content["ErrCode"])
+
+
+    def test_do_patch(self):
+        httpretty.register_uri(
+            httpretty.PATCH,
+            self.uri,
+            status=self.status_ok,
+            body=json.dumps(self.resp)
+            )
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_patch(self.header, self.request)
+        content = json.loads(result.content)
+        self.assertEqual(self.status_ok, result.status_code)
+        self.assertEqual(0, content["ErrCode"])
+
+
+    def test_do_delete(self):
+        httpretty.register_uri(
+            httpretty.DELETE,
+            self.uri,
+            status=self.status_ok,
+            body=json.dumps(self.resp)
+            )
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        cert_store.set_url()
+        result = cert_store.do_delete(self.header)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -120,44 +158,76 @@ class ApiTest(unittest.TestCase):
     def test_do_request_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        request_func = do_post
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        request_func = cert_store.do_post
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.post', mock_do_post):
-                _, result = do_request(
+                _, result = cert_store.do_request(
                     {
                         "headers": self.header,
                         "body": self.request,
-                        "url": self.uri
                         },
-                    self.apikey,
-                    self.cert_path,
                     request_func
                     )
 
                 self.assertEqual(0, result["ErrCode"])
 
-    def test_do_request_fail(self):
+    def test_do_request_not_found(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
-        request_func = do_post
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        request_func = cert_store.do_post
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.post', mock_do_post):
-                _, result = do_request(
+                _, result = cert_store.do_request(
                     {
                         "headers": self.header,
                         "body": self.request,
-                        "url": self.uri
                         },
-                    self.apikey,
-                    self.cert_path,
                     request_func
                     )
 
-                self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
+
+    def test_do_request_empty(self):
+        mock_do_post = mock.Mock(return_value=Response(self.status_not_found, ""))
+        mock_run_cmd = mock.Mock(return_value=self.cipher)
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        request_func = cert_store.do_post
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.post', mock_do_post):
+                _, result = cert_store.do_request(
+                    {
+                        "headers": self.header,
+                        "body": self.request,
+                        },
+                    request_func
+                    )
+
+                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMsg"])
+                self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
 
     def test_do_prepare_succ(self):
         mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.Session.send', mock_send):
                 poeid_filepart = (
@@ -166,21 +236,24 @@ class ApiTest(unittest.TestCase):
                         )
                 files = {"poe_id": poeid_filepart}
 
-                _, result = do_prepare(
+                _, result = cert_store.do_prepare(
                         requests.Request(
                             "POST",
                             url=self.url,
                             files=files
                             ).prepare(),
-                        self.apikey,
-                        self.cert_path
                         )
 
                 self.assertEqual(0, result["ErrCode"])
 
-    def test_do_prepare_fail(self):
+    def test_do_prepare_not_found(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
         with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
             with mock.patch('requests.Session.send', mock_send):
                 poeid_filepart = (
@@ -191,32 +264,62 @@ class ApiTest(unittest.TestCase):
                         "poe_id": poeid_filepart,
                         }
 
-                _, result = do_prepare(
+                _, result = cert_store.do_prepare(
                         requests.Request(
                             "POST",
                             url=self.url,
                             files=files
                             ).prepare(),
-                        self.apikey,
-                        self.cert_path
                         )
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
 
-                self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
+
+    def test_do_prepare_empyt(self):
+        mock_send = mock.Mock(return_value=Response(self.status_not_found, ""))
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_SERVER_RESP_INVALID, "ErrMsg": MSG_SERVER_RESP_INVALID})])
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.Session.send', mock_send):
+                poeid_filepart = (
+                        "",
+                        "poe id",
+                        )
+                files = {
+                        "poe_id": poeid_filepart,
+                        }
+
+                _, result = cert_store.do_prepare(
+                        requests.Request(
+                            "POST",
+                            url=self.url,
+                            files=files
+                            ).prepare(),
+                        )
+                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMsg"])
+                self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
+
 
     def test_do_request_with_no_encrypt_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
-        request_func = do_post
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri,
+                False
+                )
+        request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
-            _, result = do_request(
+            _, result = cert_store.do_request(
                 {
                     "headers": self.header,
                     "body": self.request,
-                    "url": self.uri,
                     },
-                self.apikey,
-                self.cert_path,
                 request_func,
-                False
                 )
 
             self.assertEqual(0, result["ErrCode"])

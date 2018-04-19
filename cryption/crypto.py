@@ -23,6 +23,8 @@ MAX_TIMEOUT = 3
 CRYPTO_BIN_PATH = "./utils/crypto-util"
 SIGN_BIN_PATH = "./utils/sign-util"
 CUR_PATH = os.path.dirname(__file__)
+MODE_CRYPTO = "crypt"
+MODE_SIGN = "sign"
 
 @timeout_decorator.timeout(MAX_TIMEOUT, timeout_exception=Exception)
 def run_cmd(params, mode):
@@ -38,7 +40,7 @@ def run_cmd(params, mode):
     cmd = " ".join([bin_path, params_str])
     result = os.popen(cmd).read()
     if result.startswith("[ERROR]"):
-        raise Exception("%s, failed to run cmd: %s" %(result, cmd))
+        raise Exception("{}, failed to run cmd: {}".format(result, cmd))
 
     return result.strip()
             
@@ -57,7 +59,7 @@ def decrypt_and_verify(cipher_b64, apikey, cert_path):
         "path": cert_path,
         "data": cipher_b64
     }
-    return run_cmd(params,"crypt")
+    return run_cmd(params, MODE_CRYPTO)
 
 def sign_and_encrypt(plain_text, apikey, cert_path):
     """Sign and encrypt date with executable
@@ -74,7 +76,7 @@ def sign_and_encrypt(plain_text, apikey, cert_path):
         "path": cert_path,
         "data": "'{}'".format(b64encode(plain_text))
     }
-    result = run_cmd(params, "crypt")
+    result = run_cmd(params, MODE_CRYPTO)
     return result
 
 def sign(plain_text, secret_key, did, nonce):
@@ -93,7 +95,7 @@ def sign(plain_text, secret_key, did, nonce):
         "did": did,
         "data": "'{}'".format(b64encode(plain_text))
     }
-    signed_data = run_cmd(params, "sign")
+    signed_data = run_cmd(params, MODE_SIGN)
 
     return signed_data
 
