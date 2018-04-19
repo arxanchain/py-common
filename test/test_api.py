@@ -14,7 +14,8 @@ ROOTPATH = os.path.join(
     "../"
     )
 sys.path.append(ROOTPATH)
-from rest.api.api import Config
+from rest.api.api import Client, MSG_DECRYPT_FAILED, MSG_RESP_BODY_EMPTY, \
+        CODE_DECRYPT_FAILED, CODE_RESP_BODY_EMPTY
 
 class Response(object):
     def __init__(self, status_code, text):
@@ -64,7 +65,7 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -85,7 +86,7 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -104,7 +105,7 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -123,7 +124,7 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -142,7 +143,7 @@ class ApiTest(unittest.TestCase):
             status=self.status_ok,
             body=json.dumps(self.resp)
             )
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -157,7 +158,7 @@ class ApiTest(unittest.TestCase):
     def test_do_request_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -175,10 +176,10 @@ class ApiTest(unittest.TestCase):
 
                 self.assertEqual(0, result["ErrCode"])
 
-    def test_do_request_fail(self):
+    def test_do_request_not_found(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
-        cert_store = Config(
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -194,12 +195,35 @@ class ApiTest(unittest.TestCase):
                     request_func
                     )
 
-                self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
+
+    def test_do_request_empty(self):
+        mock_do_post = mock.Mock(return_value=Response(self.status_not_found, ""))
+        mock_run_cmd = mock.Mock(return_value=self.cipher)
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        request_func = cert_store.do_post
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.post', mock_do_post):
+                _, result = cert_store.do_request(
+                    {
+                        "headers": self.header,
+                        "body": self.request,
+                        },
+                    request_func
+                    )
+
+                self.assertEqual(MSG_RESP_BODY_EMPTY, result["ErrMsg"])
+                self.assertEqual(CODE_RESP_BODY_EMPTY, result["ErrCode"])
 
     def test_do_prepare_succ(self):
         mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps(self.resp)])
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -222,10 +246,10 @@ class ApiTest(unittest.TestCase):
 
                 self.assertEqual(0, result["ErrCode"])
 
-    def test_do_prepare_fail(self):
+    def test_do_prepare_not_found(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, {}])
-        cert_store = Config(
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri
@@ -247,12 +271,42 @@ class ApiTest(unittest.TestCase):
                             files=files
                             ).prepare(),
                         )
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
 
-                self.assertEqual(self.resp_not_found, result["ClientErrMsg"])
+
+    def test_do_prepare_empyt(self):
+        mock_send = mock.Mock(return_value=Response(self.status_not_found, ""))
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_RESP_BODY_EMPTY, "ErrMsg": MSG_RESP_BODY_EMPTY})])
+        cert_store = Client(
+                self.apikey,
+                self.cert_path,
+                self.uri
+                )
+        with mock.patch('cryption.crypto.run_cmd', mock_run_cmd):
+            with mock.patch('requests.Session.send', mock_send):
+                poeid_filepart = (
+                        "",
+                        "poe id",
+                        )
+                files = {
+                        "poe_id": poeid_filepart,
+                        }
+
+                _, result = cert_store.do_prepare(
+                        requests.Request(
+                            "POST",
+                            url=self.url,
+                            files=files
+                            ).prepare(),
+                        )
+                self.assertEqual(MSG_RESP_BODY_EMPTY, result["ErrMsg"])
+                self.assertEqual(CODE_RESP_BODY_EMPTY, result["ErrCode"])
+
 
     def test_do_request_with_no_encrypt_succ(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
-        cert_store = Config(
+        cert_store = Client(
                 self.apikey,
                 self.cert_path,
                 self.uri,

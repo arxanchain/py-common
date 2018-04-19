@@ -30,9 +30,20 @@ CERT_PATH = os.path.join(ROOT_PATH, "cryption/ecc/certs")
 STATUS_CODE_OK = 200
 
 APIKEY = "pWEzB4yMM1518346407"
+CODE_RESP_BODY_EMPTY = 10000
+CODE_DECRYPT_FAILED = 10001
+MSG_RESP_BODY_EMPTY = "client error: resp body empty"
+MSG_DECRYPT_FAILED = "client error: decrypt and verify failed"
+RESP_DICT = {
+        "ErrCode":0,
+        "ErrMessage":"",
+        "Method":"",
+        "Payload":""
+        }
 
-class Config(object):
-    """A cert store implementation. """
+
+class Client(object):
+    """A client implementation. """
 
     def __init__(self, apikey, cert_path, ip_addr="", enable_crypto=True):
         self.__apikey = apikey
@@ -70,11 +81,9 @@ class Config(object):
         else:
             self.__url = url
 
-
     def get_apikey(self):
         """ Get api key. """
         return self.__apikey
-
 
     def set_sign_body(self, body, secret_key, did, nonce):
         """Set body signed.
@@ -92,15 +101,16 @@ class Config(object):
                 nonce
                 )
 
-
     def require_ok(self, resp):
         """Validate response.
     
         :param resp: response
-        :Returns: plain response body. if enable_crypto is True, then return
-        dict will have field 'ClientErrMsg', otherwise not
+        :Returns: plain response body. If failing to decrypt
+        the json, then will put client error message and error
+        code into "ErrMsg" field, and put client error code(
+        like 100XX) into "ErrCode" field
         """
-        result = {}
+        result = RESP_DICT
         if resp.status_code != STATUS_CODE_OK:
             logging.error("Status code: {}, Client Error, body: {}".format(
                     resp.status_code,
@@ -108,9 +118,10 @@ class Config(object):
     
         if len(resp.text) <= 0:
             logging.error("Respond error: Body empty")
-    
-            if self.__enable_crypto:
-                result["ClientErrMsg"] = "Respond error: Body empty"
+            result["ErrCode"] = CODE_RESP_BODY_EMPTY
+            result["ErrMsg"] = MSG_RESP_BODY_EMPTY
+            logging.error("*****result: {}****".format(result))
+
             return result
     
         # Decrypt and verify
@@ -123,13 +134,13 @@ class Config(object):
                         self.__cert_path
                         )
                 result.update(json.loads(plain_body))
-                result["ClientErrMsg"] = ""
             except Exception:
                 logging.error(
                         "cannot decrypt_and_verify response body: %s",
                         resp.text
                         )
-                result["ClientErrMsg"] = resp.text
+                result["ErrCode"] = CODE_DECRYPT_FAILED
+                result["ErrMsg"] = MSG_DECRYPT_FAILED
             finally:
                 return result
     
@@ -180,7 +191,6 @@ class Config(object):
     
         return time_dur, resp
 
-
     def do_get(self, headers):
         """Start GET request.
     
@@ -188,7 +198,6 @@ class Config(object):
         :Returns: response
         """
         return requests.get(self.__url, headers=headers)
-    
     
     def do_post(self, headers, body, files=None):
         """Start POST request.
@@ -204,7 +213,6 @@ class Config(object):
                 data=body,
                 files=files
                 )
-    
     
     def do_put(self, headers, body):
         """Start POST request.
