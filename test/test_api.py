@@ -178,7 +178,7 @@ class ApiTest(unittest.TestCase):
 
     def test_do_request_not_found(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMessage": MSG_DECRYPT_FAILED})])
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
@@ -195,7 +195,7 @@ class ApiTest(unittest.TestCase):
                     request_func
                     )
 
-                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMessage"])
                 self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
 
     def test_do_request_empty(self):
@@ -217,7 +217,7 @@ class ApiTest(unittest.TestCase):
                     request_func
                     )
 
-                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMsg"])
+                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMessage"])
                 self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
 
     def test_do_prepare_succ(self):
@@ -248,7 +248,7 @@ class ApiTest(unittest.TestCase):
 
     def test_do_prepare_not_found(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMsg": MSG_DECRYPT_FAILED})])
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMessage": MSG_DECRYPT_FAILED})])
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
@@ -271,13 +271,13 @@ class ApiTest(unittest.TestCase):
                             files=files
                             ).prepare(),
                         )
-                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMsg"])
+                self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMessage"])
                 self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
 
 
     def test_do_prepare_empyt(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, ""))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_SERVER_RESP_INVALID, "ErrMsg": MSG_SERVER_RESP_INVALID})])
+        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_SERVER_RESP_INVALID, "ErrMessage": MSG_SERVER_RESP_INVALID})])
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
@@ -300,7 +300,7 @@ class ApiTest(unittest.TestCase):
                             files=files
                             ).prepare(),
                         )
-                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMsg"])
+                self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMessage"])
                 self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
 
 

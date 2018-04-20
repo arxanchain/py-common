@@ -107,7 +107,7 @@ class Client(object):
         :param resp: response
         :Returns: plain response body. If failing to decrypt
         the json, then will put client error message and error
-        code into "ErrMsg" field, and put client error code(
+        code into "ErrMessage" field, and put client error code(
         like 100XX) into "ErrCode" field
         """
         result = RESP_DICT
@@ -119,7 +119,7 @@ class Client(object):
         if len(resp.text) <= 0:
             logging.error("Respond error: Body empty")
             result["ErrCode"] = CODE_SERVER_RESP_INVALID
-            result["ErrMsg"] = MSG_SERVER_RESP_INVALID
+            result["ErrMessage"] = MSG_SERVER_RESP_INVALID
 
             return result
     
@@ -139,7 +139,7 @@ class Client(object):
                         resp.text
                         )
                 result["ErrCode"] = CODE_DECRYPT_FAILED
-                result["ErrMsg"] = MSG_DECRYPT_FAILED
+                result["ErrMessage"] = MSG_DECRYPT_FAILED
             finally:
                 return result
     
