@@ -33,10 +33,10 @@ If you have no idea where your py-common is installed, use the following command
 
 ```sh
 $ python -c 'import imp;print imp.find_module("cryption")[1]'
-/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption
+/usr/local/lib/python2.7/site-packages/py_common-1.5.1-py2.7.egg/cryption
 ```
 
-In this case, you should create directory `/usr/local/lib/python2.7/site-packages/py_common-1.5.0-py2.7.egg/cryption/utils/`, and copy the executables into this path.
+In this case, you should create directory `/usr/local/lib/python2.7/site-packages/py_common-1.5.1-py2.7.egg/cryption/utils/`, and copy the executables into this path.
 
 ### 2. Configure you certificates
 
@@ -48,11 +48,11 @@ After downloading the two files, use the following command to convert your priva
 $ openssl ec -in apikey.key -outform PEM -out apikey.key
 ```
 
-Then copy (rename as follows) your TLS certificate and PEM private key file into your py-common installation path as follows. Please pay special attention to the absolute path of your certificate `./py_common-1.5.0-py2.7.egg/cryption/ecc/certs`, which will be used to create a client.
+Then copy (rename as follows) your TLS certificate and PEM private key file into your py-common installation path as follows. Please pay special attention to the absolute path of your certificate `./py_common-1.5.1-py2.7.egg/cryption/ecc/certs`, which will be used to create a client.
 
 ```
 .
-├── py_common-1.5.0-py2.7.egg
+├── py_common-1.5.1-py2.7.egg
 |   └── cryption
 |       ├── ecc
 |       |   └── certs
