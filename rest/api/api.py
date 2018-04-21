@@ -17,6 +17,7 @@ limitations under the License.
 import time
 import sys
 import os
+import copy
 import json
 import logging
 import requests
@@ -171,7 +172,7 @@ class Client(object):
     
         time_dur = time.time() - beg_time
     
-        return time_dur, resp
+        return time_dur, copy.deepcopy(resp)
 
     def do_prepare(self, prepared):
         """ Do requst with the given request object.
