@@ -17,7 +17,7 @@ setup(
     platforms='any',
     install_requires=requirements,
     dependency_links=[
-        "git+git@github.com:gabrielfalcao/HTTPretty.git#egg=httpretty-0.8.14"
+        "git+git@github.com:gabrielfalcao/HTTPretty.git#egg=httpretty"
     ],
     package_data={
         "cryption": ["cryption/ecc/certs/tls/tls.cert",
