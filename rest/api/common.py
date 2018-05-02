@@ -22,7 +22,7 @@ ROUTETAG = "Route-Tag"
 InvokeModeSync = "sync"
 InvokeModeAsync = "async"
 
-InvokeModeHeader = "BC-Invoke-Mode"
+InvokeModeHeader = "Bc-Invoke-Mode"
 
 def build_signature_body(creator, created, nonce, privateB64, payload):
     """Build signature body dict.
