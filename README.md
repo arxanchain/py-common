@@ -25,9 +25,9 @@ $ python setup.py install # install py-common
 
 ### 1.Configure your encryption and signing libraries
 
-1. Build executables with sdk-go-common encryption tools. To build these executables, you need to install **golang** and download **sdk-go-common**. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md).
+1. Build dynamic link library with sdk-go-common encryption tools(Ubuntu users can go through this step because library file is installed by default). To build this library, you need to install **golang** and download **sdk-go-common**. For more details please refer to [sdk-go-common](https://github.com/arxanchain/sdk-go-common/tree/master/crypto/tools/README.md).
 
-2. Copy the executables **crypto-util** and **sign-util** into your py-common installation path `cryption/utils`.
+2. Copy the library file **utils.so** into your py-common installation path `cryption/utils`.
 
 If you have no idea where your py-common is installed, use the following command to check it out (you need to leave the py-common code repo before running this command).
 
@@ -36,7 +36,7 @@ $ python -c 'import imp;print imp.find_module("cryption")[1]'
 /usr/local/lib/python2.7/site-packages/py_common-1.5.1-py2.7.egg/cryption
 ```
 
-In this case, you should create directory `/usr/local/lib/python2.7/site-packages/py_common-1.5.1-py2.7.egg/cryption/utils/`, and copy the executables into this path.
+In this case, you should create directory `/usr/local/lib/python2.7/site-packages/py_common-2.0-py2.7.egg/cryption/utils/`, and copy the file into this path.
 
 ### 2. Configure you certificates
 
@@ -62,8 +62,7 @@ Then copy (rename as follows) your TLS certificate and PEM private key file into
 |       |           └── pWEzB4yMM1518346407
 |       |               └── pWEzB4yMM1518346407.key
 |       └── utils
-|           ├── sign-util
-|           └── crypto-util
+|           └── utils.so
 ```
 
 ### Run unit test

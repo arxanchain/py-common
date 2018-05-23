@@ -15,51 +15,42 @@ limitations under the License.
 """
 
 import logging
+import ctypes
 import os
-import timeout_decorator
 from base64 import b64encode, b64decode
 
-MAX_TIMEOUT = 3
-CRYPTO_BIN_PATH = "./utils/crypto-util"
-SIGN_BIN_PATH = "./utils/sign-util"
 CUR_PATH = os.path.dirname(__file__)
-MODE_CRYPTO = "crypt"
-MODE_SIGN = "sign"
+UTILS_LIB_PATH = "utils/utils.so"
+DECRYPT_MODE = "2"
+ENCRYPT_MODE = "1"
 
-@timeout_decorator.timeout(MAX_TIMEOUT, timeout_exception=Exception)
-def run_cmd(params, mode):
-    params_str = " ".join(map(lambda x: "-{0} {1}".format(x, params[x]), params))
-    bin_path = ""
-    if mode == "crypt":
-        bin_path = os.path.join(CUR_PATH, CRYPTO_BIN_PATH)
-    elif mode == "sign":
-        bin_path = os.path.join(CUR_PATH, SIGN_BIN_PATH)
-    else:
-        raise Exception("%s, unsupported mode" %mode)
-
-    cmd = " ".join([bin_path, params_str])
-    result = os.popen(cmd).read()
-    if result.startswith("[ERROR]"):
-        raise Exception("{}, failed to run cmd: {}".format(result, cmd))
-
-    return result.strip()
-            
-def decrypt_and_verify(cipher_b64, apikey, cert_path):
+def decrypt_and_verify(cipher, apikey, cert_path):
     """Decrypt and verify date with executable
     generated from crypto tools in sdk-go-common
 
-    :param cipher_b64: base64 formatted data to be decrypted and verified
+    :param cipher: data to be decrypted and verified
     :param apikey: api key generated from server
     :param cert_path: private key file and cert file
     :Returns: decoded and verified message
     """
-    params = {
-        "mode": "2",
-        "apikey": apikey,
-        "path": cert_path,
-        "data": cipher_b64
-    }
-    return run_cmd(params, MODE_CRYPTO)
+    if len(cipher) <= 0:
+        return ""
+    
+    params = [
+        DECRYPT_MODE,
+        apikey,
+        cert_path,
+        "{}".format(b64encode(cipher))
+    ]
+    path = os.path.join(CUR_PATH, UTILS_LIB_PATH)
+    encrypt = ctypes.CDLL(path).encrypt
+    encrypt.argtypes = [ctypes.c_char_p] * 4
+    encrypt.restype = ctypes.c_char_p
+    result = encrypt(*params)
+    if result is None or len(result)<=0:
+        raise Exception("failed to run decrypt, result empty")
+
+    return result.strip()
 
 def sign_and_encrypt(plain_text, apikey, cert_path):
     """Sign and encrypt date with executable
@@ -70,13 +61,23 @@ def sign_and_encrypt(plain_text, apikey, cert_path):
     :param cert_path: private key file and cert file
     :Returns: signed and encrypted message
     """
-    params = {
-        "mode": "1",
-        "apikey": apikey,
-        "path": cert_path,
-        "data": "'{}'".format(b64encode(plain_text))
-    }
-    result = run_cmd(params, MODE_CRYPTO)
+    if len(plain_text) <= 0:
+        return ""
+
+    params = [
+        ENCRYPT_MODE,
+        apikey,
+        cert_path,
+        "{}".format(b64encode(plain_text))
+    ]
+    path = os.path.join(CUR_PATH, UTILS_LIB_PATH)
+    encrypt = ctypes.CDLL(path).encrypt
+    encrypt.argtypes = [ctypes.c_char_p] * 4
+    encrypt.restype = ctypes.c_char_p
+    result = encrypt(*params)
+    if result is None or len(result)<=0:
+        raise Exception("failed to run decrypt, result empty")
+
     return result
 
 def sign(plain_text, secret_key, did, nonce):
@@ -89,13 +90,22 @@ def sign(plain_text, secret_key, did, nonce):
     :param nonce: nonce
     :Returns: signed message
     """
-    params = {
-        "key": secret_key,
-        "nonce": nonce,
-        "did": did,
-        "data": "'{}'".format(b64encode(plain_text))
-    }
-    signed_data = run_cmd(params, MODE_SIGN)
+    if len(plain_text) <= 0:
+        return ""
+    
+    params = [
+        secret_key,
+        nonce,
+        did,
+        "{}".format(b64encode(plain_text))
+    ]
+    path = os.path.join(CUR_PATH, UTILS_LIB_PATH)
+    sign = ctypes.CDLL(path).sign
+    sign.argtypes = [ctypes.c_char_p] * 4
+    sign.restype = ctypes.c_char_p
+    result = sign(*params)
+    if result is None or len(result)<=0:
+        raise Exception("failed to run sign, result empty")
 
-    return signed_data
+    return result
 
