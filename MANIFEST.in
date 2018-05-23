@@ -1,1 +1,1 @@
-include requirements.txt cryption/ecc/certs/tls/tls.cert cryption/ecc/certs/users/pWEzB4yMM1518346407/pWEzB4yMM1518346407.key
+include requirements.txt cryption/ecc/certs/tls/tls.cert cryption/ecc/certs/users/pWEzB4yMM1518346407/pWEzB4yMM1518346407.key cryption/utils/utils.h cryption/utils/utils.so
