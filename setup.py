@@ -22,6 +22,8 @@ setup(
     package_data={
         "cryption": ["cryption/ecc/certs/tls/tls.cert",
             "cryption/ecc/certs/users/pWEzB4yMM1518346407/pWEzB4yMM1518346407.key"
+            "cryption/utils/utils.so",
+            "cryption/utils/utils.h"
             ]
         },
     zip_safe=False,

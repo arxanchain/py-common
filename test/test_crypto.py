@@ -23,14 +23,13 @@ ROOTPATH = os.path.join(
     "../"
     )
 sys.path.append(ROOTPATH)
-from cryption.crypto import sign_and_encrypt, decrypt_and_verify, sign, run_cmd
+from cryption.crypto import sign_and_encrypt, decrypt_and_verify, sign
 
 # Create your tests here.
 class CryptTest(unittest.TestCase):
     """Crypto test. """
     def setUp(self):
         # Every test needs access to the request factory.
-        self.error_code = "[ERROR]"
         self.cur_path = os.path.dirname(__file__)
         self.signed = "WxW9ZfF9hbc2tcRLweiojhR+ZgPwhFRLGqTD9M4vPH5o2qhvOTi0J9INu5ktqReGHE/5lwMntcxJLXdBRhRMAA=="
         self.failed_cert_store = "[ERROR]: Init cert store fail: stat ~/sdk-go-common/rest/api/client_certs/: no such file or directory"
@@ -48,67 +47,60 @@ class CryptTest(unittest.TestCase):
     
     def test_sign_and_crypt_succ(self):
         """Test sign and crypt success. """
-        run_cmd_sign_and_crypto = mock.Mock(return_value=self.cipher)
         apikey = "pWEzB4yMM1518346407"
         plain_text = "Hello world!"
         client_cert_path = os.path.join(
             self.cur_path,
             "../cryption/ecc/certs"
             )
-        with mock.patch('cryption.crypto.run_cmd', run_cmd_sign_and_crypto):
-            result = sign_and_encrypt(
-                plain_text, 
-                apikey, 
-                client_cert_path
-                )
-            self.assertTrue(result)
+        result = sign_and_encrypt(
+            plain_text, 
+            apikey, 
+            client_cert_path
+            )
+        self.assertTrue(result)
 
     def test_sign_and_crypt_fail(self):
         """Test sign and crypt success. """
-        run_cmd_sign_and_crypto = mock.Mock(return_value=self.failed_cert_store)
         apikey = "pWEzB4yMM1518346407"
         plain_text = "Hello world!"
         client_cert_path = os.path.join(
             self.cur_path,
             "../cryption/ecc/wrong_certs"
             )
-        with mock.patch('cryption.crypto.run_cmd', run_cmd_sign_and_crypto):
+        with self.assertRaises(Exception):
             result = sign_and_encrypt(
-                plain_text,
-                apikey,
-                client_cert_path
-                )
-            self.assertTrue(result.startswith(self.error_code))
+            plain_text,
+            apikey,
+            client_cert_path
+            )
 
-    def test_decrypt_and_verify(self):
+    def test_decrypt_and_verify_failed(self):
         """Test decrypt and verify. """
-        run_cmd_decrypt_and_verify = mock.Mock(return_value=self.cipher_body)
         apikey = "pWEzB4yMM1518346407"
         client_cert_path = os.path.join(
             self.cur_path,
             "../cryption/ecc/certs"
             )
-        with mock.patch('cryption.crypto.run_cmd', run_cmd_decrypt_and_verify):
+        with self.assertRaises(Exception):
             result = decrypt_and_verify(
                 self.cipher, 
                 apikey, 
                 client_cert_path
                 )
-            self.assertEqual(0, result["ErrCode"])
+            self.assertTrue(result)
 
     def test_sign(self):
         """Test sign procedure. """
-        run_cmd_sign = mock.Mock(return_value=self.signed)
         plain_text = "Hello world!"
         did = "did:axn:93cec4c3-56d5-44ee-aa40-07c975f3e59a"
         nonce = "nonce"
         secretkeyB64 = "Dlpxjv6G0FpXIi3y3mIUSAfeRJAUd2Pa91Bd4jS69Z9u7qY+3HgZuq23NHAMgDfx7oaxj7fFusujfWuBuGuGdQ=="
-        with mock.patch("cryption.crypto.run_cmd", run_cmd_sign):
-            signed = sign(
-                plain_text,
-                secretkeyB64,
-                did,
-                nonce
-                )
-            self.assertFalse(signed.startswith(self.error_code))
+        signed = sign(
+            plain_text,
+            secretkeyB64,
+            did,
+            nonce
+            )
+        self.assertTrue(signed)
             
