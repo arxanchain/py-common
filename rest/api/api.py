@@ -46,12 +46,18 @@ RESP_DICT = {
 class Client(object):
     """A client implementation. """
 
-    def __init__(self, apikey, cert_path, ip_addr="", enable_crypto=True):
+    def __init__(self, apikey, cert_path, ent_sign_param,
+            ip_addr="", enable_crypto=True):
         self.__apikey = apikey
         self.__cert_path = cert_path
         self.__ip_addr = ip_addr
         self.__enable_crypto = enable_crypto
+        self.__ent_sign_param = ent_sign_param
         self.__url = ""
+
+    def get_ent_params(self):
+        """ Get enterprise sign params."""
+        return self.__ent_sign_param
 
     def set_body(self, body):
         """Set body encdypted.
