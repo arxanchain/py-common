@@ -73,8 +73,8 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True
                 )
-        cert_store.set_url()
-        result = cert_store.do_get(self.header)
+        # cert_store.set_url()
+        result = cert_store.do_get(self.uri, self.header)
         self.assertEqual(self.status_ok, result.status_code)
         content = json.loads(result.content)
         self.assertEqual(0, content["ErrCode"])
@@ -96,8 +96,8 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True
                 )
-        cert_store.set_url()
-        result = cert_store.do_post(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_post(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -117,8 +117,8 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True
                 )
-        cert_store.set_url()
-        result = cert_store.do_put(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_put(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -138,8 +138,8 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True
                 )
-        cert_store.set_url()
-        result = cert_store.do_patch(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_patch(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -159,8 +159,8 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True
                 )
-        cert_store.set_url()
-        result = cert_store.do_delete(self.header)
+        # cert_store.set_url()
+        result = cert_store.do_delete(self.uri, self.header)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -179,6 +179,7 @@ class ApiTest(unittest.TestCase):
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -200,6 +201,7 @@ class ApiTest(unittest.TestCase):
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -223,6 +225,7 @@ class ApiTest(unittest.TestCase):
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -331,6 +334,7 @@ class ApiTest(unittest.TestCase):
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
