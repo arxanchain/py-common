@@ -55,3 +55,4 @@ def build_signature_body_base(creator, created, nonce, privateB64, payload):
     result["signature_value"] = b64decode(result["signature_value"])
     
     return result
+
