@@ -9,3 +9,9 @@
 ## v2.0
 
 * Replace binaries crypto tools into dynamic link library.
+
+## v2.0.1
+
+* Add parameter **ent_sign_param** into Client to initialize private key for enterprise.
+
+* Refactor Client member functions setting varible **url** into function parameter to solve concurrent problems.
