@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from cryption.crypto import sign
+from base64 import b64decode
 
 APIKEYHEADER = "API-Key"
 FABIOROUTETAGHEADER = "Host"
@@ -49,4 +50,9 @@ def build_signature_body(creator, created, nonce, privateB64, payload):
             }
     return result
 
+def build_signature_body_base(creator, created, nonce, privateB64, payload):
+    result = build_signature_body(creator, created, nonce, privateB64, payload)
+    result["signature_value"] = b64decode(result["signature_value"])
+    
+    return result
 

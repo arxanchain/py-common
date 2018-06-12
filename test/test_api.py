@@ -27,6 +27,7 @@ class ApiTest(unittest.TestCase):
     """Rest api test. """
     def setUp(self):
         # Every test needs access to the request factory.
+        self.sig_param = {}
         self.header = {}
         self.url = "http://127.0.0.1"
         self.status_not_found = 404
@@ -68,10 +69,12 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
-        cert_store.set_url()
-        result = cert_store.do_get(self.header)
+        # cert_store.set_url()
+        result = cert_store.do_get(self.uri, self.header)
         self.assertEqual(self.status_ok, result.status_code)
         content = json.loads(result.content)
         self.assertEqual(0, content["ErrCode"])
@@ -89,10 +92,12 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
-        cert_store.set_url()
-        result = cert_store.do_post(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_post(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -108,10 +113,12 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
-        cert_store.set_url()
-        result = cert_store.do_put(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_put(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -127,10 +134,12 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
-        cert_store.set_url()
-        result = cert_store.do_patch(self.header, self.request)
+        # cert_store.set_url()
+        result = cert_store.do_patch(self.uri, self.header, self.request)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -146,10 +155,12 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
-        cert_store.set_url()
-        result = cert_store.do_delete(self.header)
+        # cert_store.set_url()
+        result = cert_store.do_delete(self.uri, self.header)
         content = json.loads(result.content)
         self.assertEqual(self.status_ok, result.status_code)
         self.assertEqual(0, content["ErrCode"])
@@ -160,12 +171,15 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -179,12 +193,15 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -200,12 +217,15 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
@@ -220,7 +240,9 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -245,7 +267,9 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -273,7 +297,9 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
-                self.uri
+                self.sig_param,
+                self.uri,
+                True
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -300,6 +326,7 @@ class ApiTest(unittest.TestCase):
         cert_store = Client(
                 self.apikey,
                 self.cert_path,
+                self.sig_param,
                 self.uri,
                 False
                 )
@@ -307,6 +334,7 @@ class ApiTest(unittest.TestCase):
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
                 {
+                    "url": self.uri,
                     "headers": self.header,
                     "body": self.request,
                     },
