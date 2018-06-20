@@ -40,7 +40,7 @@ def decrypt_and_verify(cipher, apikey, cert_path):
         DECRYPT_MODE,
         apikey,
         cert_path,
-        "{}".format(b64encode(cipher))
+        "{}".format(cipher)
     ]
     path = os.path.join(CUR_PATH, UTILS_LIB_PATH)
     encrypt = ctypes.CDLL(path).encrypt
