@@ -188,8 +188,9 @@ class Client(object):
         to do the request
         :Returns: time duration, response
         """
-        prepared.body = self.set_body(prepared.body)
-        prepared.headers['Content-Length'] = str(len(prepared.body))
+        if self.__enable_crypto:
+            prepared.body = self.set_body(prepared.body)
+            prepared.headers['Content-Length'] = str(len(prepared.body))
         beg_time = time.time()
         result = requests.session().send(prepared)
         resp = self.require_ok(result)
