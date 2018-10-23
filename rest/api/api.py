@@ -46,17 +46,21 @@ RESP_DICT = {
 class Client(object):
     """A client implementation. """
 
-    def __init__(self, apikey, cert_path, 
-            ent_sign_param, ip_addr="", enable_crypto=True, 
-            cert=None, verify=None):
+    def __init__(self, apikey, ent_sign_param,
+            ip_addr="", enable_ssl=True, cert=None,
+            verify=None):
         self.__apikey = apikey
-        self.__cert_path = cert_path
+        self.__cert_path = ""
         self.__ip_addr = ip_addr
-        self.__enable_crypto = enable_crypto
+        self.__enable_ssl = enable_ssl
+        self.__enable_crypto = False
         self.__ent_sign_param = ent_sign_param
         self.__url = ""
         self.__cert = cert
         self.__verify = verify
+
+    def ssl_enabled(self):
+        return self.__enable_ssl
 
     def get_ent_params(self):
         """ Get enterprise sign params."""
@@ -161,7 +165,13 @@ class Client(object):
             finally:
                 return result
     
-        result.update(json.loads(resp.text))
+        try:
+            result.update(json.loads(resp.text))
+        except Exception, e:
+            logging.error("Respond error: Unmarshal failed: {}".format(e))
+            result["ErrCode"] = CODE_SERVER_RESP_INVALID
+            result["ErrMessage"] = MSG_SERVER_RESP_INVALID
+
         return result
 
     def do_request(self, req_params, request_func):
