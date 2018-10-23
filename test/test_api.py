@@ -73,7 +73,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_get(self.uri, self.header)
@@ -98,7 +98,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_post(self.uri, self.header, self.request)
@@ -121,7 +121,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_put(self.uri, self.header, self.request)
@@ -144,7 +144,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_patch(self.uri, self.header, self.request)
@@ -167,7 +167,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_delete(self.uri, self.header)
@@ -185,7 +185,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -209,7 +209,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -235,7 +235,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -260,7 +260,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 False,
                 cert=None,
-                verify=None
+                cacert=None
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -289,7 +289,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -321,7 +321,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -352,7 +352,7 @@ class ApiTest(unittest.TestCase):
                 self.uri,
                 True,
                 cert=('./tls/client.pem', './tls/client.key'),
-                verify='./tls/ca.crt'
+                cacert='./tls/ca.crt'
         )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):

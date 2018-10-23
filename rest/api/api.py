@@ -48,7 +48,7 @@ class Client(object):
 
     def __init__(self, apikey, ent_sign_param,
             ip_addr="", enable_ssl=True, cert=None,
-            verify=None):
+            cacert=None):
         self.__apikey = apikey
         self.__cert_path = ""
         self.__ip_addr = ip_addr
@@ -57,7 +57,7 @@ class Client(object):
         self.__ent_sign_param = ent_sign_param
         self.__url = ""
         self.__cert = cert
-        self.__verify = verify
+        self.__verify = cacert
 
     def ssl_enabled(self):
         return self.__enable_ssl
