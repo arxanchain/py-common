@@ -8,7 +8,7 @@ with open('./requirements.txt') as reqs_txt:
 
 setup(
     name='py-common',
-    version='2.0.1',
+    version='3.0',
     description="Python common SDKs for Arxanchain.",
     long_description=io.open('README.md', encoding='utf-8').read(),
     url='https://github.com/arxanchain/py-common/',

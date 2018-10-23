@@ -68,10 +68,12 @@ class ApiTest(unittest.TestCase):
             )
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_get(self.uri, self.header)
@@ -91,10 +93,12 @@ class ApiTest(unittest.TestCase):
             )
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_post(self.uri, self.header, self.request)
@@ -112,10 +116,12 @@ class ApiTest(unittest.TestCase):
             )
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_put(self.uri, self.header, self.request)
@@ -133,10 +139,12 @@ class ApiTest(unittest.TestCase):
             )
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_patch(self.uri, self.header, self.request)
@@ -154,10 +162,12 @@ class ApiTest(unittest.TestCase):
             )
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         # cert_store.set_url()
         result = cert_store.do_delete(self.uri, self.header)
@@ -170,10 +180,12 @@ class ApiTest(unittest.TestCase):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -192,10 +204,12 @@ class ApiTest(unittest.TestCase):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -207,19 +221,21 @@ class ApiTest(unittest.TestCase):
                     },
                 request_func
                 )
-        self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMessage"])
-        self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
+        self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMessage"])
+        self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
 
 
     def test_do_request_empty(self):
         mock_do_post = mock.Mock(return_value=Response(self.status_not_found, ""))
-        mock_run_cmd = mock.Mock(return_value=self.cipher)
+        #mock_run_cmd = mock.Mock(return_value=self.cipher)
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
@@ -239,10 +255,12 @@ class ApiTest(unittest.TestCase):
         mock_send = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                False,
+                cert=None,
+                cacert=None
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -259,17 +277,19 @@ class ApiTest(unittest.TestCase):
                         ).prepare(),
                     )
 
-            self.assertTrue(result["ErrCode"])
+            self.assertEqual(result["ErrCode"], 0)
 
     def test_do_prepare_not_found(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, self.resp_not_found))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMessage": MSG_DECRYPT_FAILED})])
+        #mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_DECRYPT_FAILED, "ErrMessage": MSG_DECRYPT_FAILED})])
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -287,19 +307,21 @@ class ApiTest(unittest.TestCase):
                         files=files
                         ).prepare(),
                     )
-            self.assertEqual(MSG_DECRYPT_FAILED, result["ErrMessage"])
-            self.assertEqual(CODE_DECRYPT_FAILED, result["ErrCode"])
+            self.assertEqual(MSG_SERVER_RESP_INVALID, result["ErrMessage"])
+            self.assertEqual(CODE_SERVER_RESP_INVALID, result["ErrCode"])
 
 
     def test_do_prepare_empyt(self):
         mock_send = mock.Mock(return_value=Response(self.status_not_found, ""))
-        mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_SERVER_RESP_INVALID, "ErrMessage": MSG_SERVER_RESP_INVALID})])
+        #mock_run_cmd = mock.Mock(side_effect=[self.cipher, json.dumps({"ErrCode": CODE_SERVER_RESP_INVALID, "ErrMessage": MSG_SERVER_RESP_INVALID})])
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                True
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
                 )
         with mock.patch('requests.Session.send', mock_send):
             poeid_filepart = (
@@ -325,11 +347,13 @@ class ApiTest(unittest.TestCase):
         mock_do_post = mock.Mock(return_value=Response(self.status_ok, json.dumps(self.resp)))
         cert_store = Client(
                 self.apikey,
-                self.cert_path,
+                #self.cert_path,
                 self.sig_param,
                 self.uri,
-                False
-                )
+                True,
+                cert=('./tls/client.pem', './tls/client.key'),
+                cacert='./tls/ca.crt'
+        )
         request_func = cert_store.do_post
         with mock.patch('requests.post', mock_do_post):
             _, result = cert_store.do_request(
