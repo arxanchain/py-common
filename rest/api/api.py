@@ -46,18 +46,29 @@ RESP_DICT = {
 class Client(object):
     """A client implementation. """
 
-    def __init__(self, apikey, cert_path, ent_sign_param,
-            ip_addr="", enable_crypto=True):
+    def __init__(self, apikey, cert_path, 
+            ent_sign_param, ip_addr="", enable_crypto=True, 
+            cert=None, verify=None):
         self.__apikey = apikey
         self.__cert_path = cert_path
         self.__ip_addr = ip_addr
         self.__enable_crypto = enable_crypto
         self.__ent_sign_param = ent_sign_param
         self.__url = ""
+        self.__cert = cert
+        self.__verify = verify
 
     def get_ent_params(self):
         """ Get enterprise sign params."""
         return self.__ent_sign_param
+
+    def get_cert(self):
+        """ Get cert from client. """
+        return self.__cert
+
+    def get_verify(self):
+        """ Get verify from client. """
+        return self.__verify
 
     def set_body(self, body):
         """Set body encdypted.
@@ -198,7 +209,7 @@ class Client(object):
     
         return time_dur, resp
 
-    def do_get(self, url, headers):
+    def do_get(self, url, headers, **kwargs):
         """Start GET request.
     
         :param headers: headers dictionary
@@ -207,10 +218,11 @@ class Client(object):
         """
         return requests.get(
                 url=url,
-                headers=headers
+                headers=headers,
+                **kwargs
                 )
     
-    def do_post(self, url, headers, body, files=None):
+    def do_post(self, url, headers, body, **kwargs):
         """Start POST request.
     
         :param header: header dictionary
@@ -223,10 +235,10 @@ class Client(object):
                 url=url,
                 headers=headers,
                 data=body,
-                files=files
+                **kwargs
                 )
     
-    def do_put(self, url, headers, body):
+    def do_put(self, url, headers, body, **kwargs):
         """Start POST request.
     
         :param headers: header dictionary
@@ -237,10 +249,11 @@ class Client(object):
         return requests.put(
                 url=url,
                 headers=headers,
-                data=body
+                data=body,
+                **kwargs
                 )
 
-    def do_patch(self, url, headers, body):
+    def do_patch(self, url, headers, body, **kwargs):
         """Start PATCH request.
     
         :param headers: header dictionary
@@ -251,10 +264,11 @@ class Client(object):
         return requests.patch(
                 url=url,
                 headers=headers,
-                data=body
+                data=body, 
+                **kwargs
                 )
     
-    def do_delete(self, url, headers):
+    def do_delete(self, url, headers, **kwargs):
         """Start DELETE request.
     
         :param headers: header dictionary
@@ -264,5 +278,6 @@ class Client(object):
         return requests.delete(
                 url=url,
                 headers=headers,
+                **kwargs
                 )
     
