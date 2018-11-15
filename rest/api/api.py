@@ -213,8 +213,14 @@ class Client(object):
             prepared.body = self.set_body(prepared.body)
             prepared.headers['Content-Length'] = str(len(prepared.body))
         beg_time = time.time()
-        result = requests.session().send(prepared)
+
+        #result = requests.session().send(prepared)
+        session = requests.session()
+        session.cert = self.__cert
+        session.verify = self.__verify
+        result = session.send(prepared)
         resp = self.require_ok(result)
+
         time_dur = time.time() - beg_time
     
         return time_dur, resp
