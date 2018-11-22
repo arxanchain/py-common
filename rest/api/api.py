@@ -132,7 +132,7 @@ class Client(object):
         code into "ErrMessage" field, and put client error code(
         like 100XX) into "ErrCode" field
         """
-        result = RESP_DICT
+        result = {}
         if resp.status_code != STATUS_CODE_OK:
             logging.error("Status code: {}, Client Error, body: {}".format(
                     resp.status_code,
