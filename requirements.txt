@@ -7,5 +7,5 @@ pbr==3.1.1
 requests==2.18.4
 six==1.11.0
 timeout-decorator
-urllib3==1.22
+urllib3==1.26.5
 httpretty==0.8.14
